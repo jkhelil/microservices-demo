@@ -54,5 +54,27 @@
 
     return custId;
   }
+
+  /* TODO: Add documentation */
+  helpers.addDomain = function(hostname) {
+    var domain = "";
+    process.argv.forEach(function (val, index, array) {
+      var arg = val.split("=");
+      if (arg.length > 1) {
+        if (arg[0] == "--domain") {
+          domain = arg[1];
+          console.log("Setting domain to:", domain);
+        }
+      }
+    });
+
+    return domain != null && domain != "" ? hostname + "." + domain : hostname;
+  }
+
+  /* Returns the given string prepended by http:// */
+  helpers.wrapHttp = function(host) {
+    return "http://" + host;
+  }
+
   module.exports = helpers;
 }());

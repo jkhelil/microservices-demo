@@ -71,5 +71,21 @@
         });
       });
     });
+
+    describe("#getCustomerId", function() {
+      /* TODO: Add tests */
+    });
+
+    describe("#addDomain", function() {
+      /* TODO: Add tests */
+    });
+
+    describe("#wrapHttp", function() {
+      it("prepends http:// to the passed argument", function() {
+        var  out      = helpers.wrapHttp("example.org")
+           , expected = "http://example.org";
+        expect(out).to.equal(expected);
+      });
+    });
   });
  }());

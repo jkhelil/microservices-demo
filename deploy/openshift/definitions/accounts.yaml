@@ -1,5 +1,5 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: accounts
   labels:
@@ -28,13 +28,13 @@ spec:
   # an external load-balanced IP for the frontend service.
   ports:
     # the port that this service should serve on
-  - port: 80
+  - port: 8080
     targetPort: 80
   selector:
     name: accounts
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: accounts-db
   labels:
@@ -52,7 +52,6 @@ spec:
         ports:
         - name: mongo
           containerPort: 27017
-          hostPort: 27017
 ---
 apiVersion: v1
 kind: Service

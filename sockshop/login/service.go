@@ -102,7 +102,7 @@ func lookupCustomer(u, p, domain string) (customerResponse, error) {
 	} else {
 		host = customerHost
 	}
-	reqUrl := "http://" + host + customerLookupPath + "?username=" + u
+	reqUrl := "http://" + host + ":8080" + customerLookupPath + "?username=" + u
 
 	res, err := http.Get(reqUrl)
 	if err != nil {

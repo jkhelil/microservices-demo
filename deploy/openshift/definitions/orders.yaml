@@ -1,5 +1,5 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: orders
   labels:
@@ -14,8 +14,31 @@ spec:
       containers:
       - name: orders
         image: weaveworksdemos/orders
+        command: ["java","-Djava.security.egd=file:/dev/urandom","-jar","./app.jar", "--port=8080"]
         ports:
-        - containerPort: 80
+        - containerPort: 8080
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: orders-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: orders-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
 ---
 apiVersion: v1
 kind: Service
@@ -28,13 +51,13 @@ spec:
   # an external load-balanced IP for the frontend service.
   ports:
     # the port that this service should serve on
-  - port: 80
-    targetPort: 80
+  - port: 8080
+    targetPort: 8080
   selector:
     name: orders
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: orders-db
   labels:
@@ -46,13 +69,26 @@ spec:
       labels:
         name: orders-db
     spec:
+      volumes:
+        -
+          name: orders-data
+          persistentVolumeClaim:
+            claimName: orders-data
+        -
+          name: orders-config
+          persistentVolumeClaim:
+            claimName: orders-config
       containers:
       - name: orders-db
         image: mongo
+        volumeMounts:
+        - name: orders-data
+          mountPath: /data/db
+        - name: orders-config
+          mountPath: /data/configdb
         ports:
         - name: mongo
           containerPort: 27017
-          hostPort: 27017
 ---
 apiVersion: v1
 kind: Service

@@ -46,7 +46,7 @@ function addDomain(hostname) {
 }
 
 function wrapHttp(host) {
-    return "http://" + host;
+    return "http://" + host + ":8080";
 }
 
 var catalogueUrl = wrapHttp(addDomain(catalogueHostname));

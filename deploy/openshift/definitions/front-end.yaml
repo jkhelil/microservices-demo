@@ -11,7 +11,8 @@ spec:
     spec:
       containers:
       - name: front-end
-        image: weaveworksdemos/front-end
+        // Need to change the 80 to 8080  in the application
+        image: mfojtik/front-end
         resources:
           requests:
             cpu: 100m

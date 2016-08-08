@@ -34,6 +34,28 @@ spec:
   selector:
     name: accounts
 ---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: accounts-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: accounts-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
 apiVersion: v1
 kind: DeploymentConfig
 metadata:
@@ -47,9 +69,24 @@ spec:
       labels:
         name: accounts-db
     spec:
+      volumes:
+        -
+          name: accounts-data
+          persistentVolumeClaim:
+            claimName: accounts-data
+        -
+          name: accounts-config
+          persistentVolumeClaim:
+            claimName: accounts-config
       containers:
       - name: accounts-db
         image: mongo
+        volumeMounts:
+        - name: accounts-data
+          mountPath: /data/db
+        - name: accounts-config
+          mountPath: /data/configdb
+        terminationMessagePath: /dev/termination-log
         ports:
         - name: mongo
           containerPort: 27017

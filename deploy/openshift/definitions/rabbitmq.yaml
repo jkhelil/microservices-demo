@@ -1,5 +1,17 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: rabbit-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: rabbitmq
   labels:
@@ -11,9 +23,17 @@ spec:
       labels:
         name: rabbitmq
     spec:
+      volumes:
+        -
+          name: rabbit-data
+          persistentVolumeClaim:
+            claimName: rabbit-data
       containers:
       - name: rabbitmq
         image: rabbitmq:3
+        volumeMounts:
+        - name: rabbit-data
+          mountPath: /var/lib/rabbitmq
         ports:
         - containerPort: 5672
 ---

@@ -1,5 +1,5 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: cart
   labels:
@@ -14,8 +14,9 @@ spec:
       containers:
       - name: cart
         image: weaveworksdemos/cart
+        command: ["java","-Djava.security.egd=file:/dev/urandom","-jar","./app.jar", "--port=8080"]
         ports:
-        - containerPort: 80
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -28,13 +29,35 @@ spec:
   # an external load-balanced IP for the frontend service.
   ports:
     # the port that this service should serve on
-  - port: 80
-    targetPort: 80
+  - port: 8080
+    targetPort: 8080
   selector:
     name: cart
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cart-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cart-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: cart-db
   labels:
@@ -46,13 +69,26 @@ spec:
       labels:
         name: cart-db
     spec:
+      volumes:
+        -
+          name: cart-data
+          persistentVolumeClaim:
+            claimName: cart-data
+        -
+          name: cart-config
+          persistentVolumeClaim:
+            claimName: cart-config
       containers:
       - name: cart-db
         image: mongo
+        volumeMounts:
+        - name: cart-data
+          mountPath: /data/db
+        - name: cart-config
+          mountPath: /data/configdb
         ports:
         - name: mongo
           containerPort: 27017
-          hostPort: 27017
 ---
 apiVersion: v1
 kind: Service
